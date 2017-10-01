@@ -304,4 +304,4 @@ Shader "Unlit/Tutorial_Shader" {
 }
 ```
 
-## Part 5: Skeleton of a Unlit Shader
+## Part 5: Shading basics
