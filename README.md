@@ -431,3 +431,105 @@ __Note: We can change how Textures in Unity are sampled by going back to the tex
 
 ## Part 6: Playing With Shaders
 
+So now that we know the basics, we can start having some fun with shaders and achieve some simple effects. First, we're going to use our noise texture and achieve a sort of "dissolve" or "cutout" effect. We'll start by adding another texture property and a float property:
+```
+Properties {
+	_Colour ("Colour", Color) = (1, 1, 1, 1)
+	_MainTexture ("Main Texture", 2D) = "white" {}
+	_DissolveTexture ("Dissolve Texture", 2D) = "white" {}
+	_DissolveCutoff ("Dissolve Cutoff", Range(0, 1)) = 1
+}
+```
+Notice how we've set _DissolveCutoff to be a Range from (0, 1). This represents a float value from 0 to 1 (inclusive) and this notation also allows us to easily set it's value using a slider. Now let's add them to our CGPROGRAM:
+```
+float4 _Colour;
+sampler2D _MainTexture;
+sampler2D _DissolveTexture;
+float _DissolveCutoff;
+```
+Now we can sample the dissolve texture in our fragment function:
+```
+fixed4 fragmentFunction (v2f IN) : SV_TARGET {
+	float4 textureColour = tex2D(_MainTexture, IN.uv);
+	float4 dissolveColour = tex2D(_Dissolve)
+	return textureColour;
+}
+```
+Notice we're still using the same UV coordinates as our main texture. Now here's where the magic happens:
+```
+fixed4 fragmentFunction (v2f IN) : SV_TARGET {
+	float4 textureColour = tex2D(_MainTexture, IN.uv);
+	float4 dissolveColour = tex2D(_DissolveTexture, IN.uv);
+	clip(dissolveColour.rgb - _DissolveCutoff);
+	return textureColour;
+}
+```
+The *clip* function works by checking if the value given is less than 0. If it is, then we discard the pixel and draw nothing. If it isn't we keep the pixel and continue as normal. The way our code currently works is:
+
+1. We sample the main texture for colour.
+2. We sample the cutout texture for it's colour.
+3. We subtract the cutoff value from the "brightness" of our cutoff sample, and...
+4. If it's less than 0, we draw nothing
+5. Otherwise, return the main texture sample colour.
+
+Now, save your shader and return to Unity. Set the "Dissolve Texture" to our noise texture, and start moving the "Dissolve Cutoff" slider, you should see an effect like this:
+
+![Playing With Shaders 1](./Images/Playing_With_Shaders_1.gif)
+
+Pretty cool huh? We can do more too. Let's try playing with the vertices before we pass them to our fragment function. Let's expose another property:
+
+```
+Properties {
+	_Colour ("Colour", Color) = (1, 1, 1, 1)
+	_MainTexture ("Main Texture", 2D) = "white" {}
+	_DissolveTexture ("Dissolve Texture", 2D) = "white" {}
+	_DissolveCutoff ("Dissolve Cutoff", Range(0, 1)) = 1
+	_ExtrudeAmount ("Extrue Amount", float) = 0
+}
+
+...
+
+float4 _Colour;
+sampler2D _MainTexture;
+sampler2D _DissolveTexture;
+float _DissolveCutoff;
+float _ExtrudeAmount;
+```
+We're also going to using normals from the model, so lets add the field into the appdata struct so we can access them:
+```
+struct appdata {
+	float4 vertex : POSITION;
+	float2 uv : TEXCOORD0;
+	float3 normal : NORMAL;
+};
+```
+Now let's add a single line to our vertex function:
+```
+v2f vertexFunction (appdata IN) {
+	v2f OUT;
+	IN.vertex.xyz += IN.normal.xyz * _ExtrudeAmount;
+	OUT.position = UnityObjectToClipPos(IN.vertex);
+	OUT.uv = IN.uv;
+	return OUT;
+}
+```
+What we're doing here is, before we transform our vertices out of local model space, we're going to offset them a certain amount outwards by adding their normal direction times our _ExtrudeAmount. A normal is just a vector that represents the direction that the vertex is facing. Now if you save and return to Unity and play with the "Extrude Amount" value, you should see an effect like this:
+
+![Playing With Shaders 2](./Images/Playing_With_Shaders_2.gif)
+
+We can even animate these properties:
+
+```
+v2f vertexFunction (appdata IN) {
+	v2f OUT;
+	IN.vertex.xyz += IN.normal.xyz * _ExtrudeAmount * sin(_Time.y);
+	OUT.position = UnityObjectToClipPos(IN.vertex);
+	OUT.uv = IN.uv;
+	return OUT;
+}
+```
+*_Time* is a variable included in *UnityCG.cginc* that represents the time, with the y value representing seconds.
+Make sure "Animated Materials" is checked on in the scene view in order to preview this effect in the editor:
+
+![Playing With Shaders 3](./Images/Playing_With_Shaders_3.gif)
+
