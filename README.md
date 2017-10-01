@@ -1,6 +1,6 @@
 # Unity-Shader-Basics-Tutorial
 
-Welcome, this tutorial is supposed to be a gentle introduction into writing shaders for Unity. It assume you have some previous knowledge in working with Unity but have never touched shaders or materials.
+Welcome, this tutorial is supposed to be a gentle introduction into writing shaders for Unity. It assumes you have some previous knowledge in working with Unity but have never touched shaders or materials.
 
 We'll be building up the shader in parts, stopping along the way to show what everything does.
 
@@ -179,13 +179,13 @@ CGPROGRAM
 	#pragma vertex vertexFunction
 	#pragma fragment fragmentFunction
 
-	#import "UnityCG.cginc"
+	#include "UnityCG.cginc"
 
 	struct appdata {
 
 	};
 
-	void vertexFunction (appdata v) {
+	void vertexFunction (appdata IN) {
 
 	}
 
@@ -218,7 +218,7 @@ CGPROGRAM
 	#pragma vertex vertexFunction
 	#pragma fragment fragmentFunction
 
-	#import "UnityCG.cginc"
+	#include "UnityCG.cginc"
 
 	struct appdata {
 		float4 vertex : POSITION;
@@ -228,7 +228,7 @@ CGPROGRAM
 	struct v2f {
 	};
 
-	v2f vertexFunction (appdata v) {
+	v2f vertexFunction (appdata IN) {
 		v2f OUT;
 
 		return OUT;
@@ -277,7 +277,7 @@ Shader "Unlit/Tutorial_Shader" {
 				#pragma vertex vertexFunction
 				#pragma fragment fragmentFunction
 
-				#import "UnityCG.cginc"
+				#include "UnityCG.cginc"
 
 				struct appdata {
 					float4 vertex : POSITION;
@@ -289,7 +289,7 @@ Shader "Unlit/Tutorial_Shader" {
 					float2 uv : TEXCOORD0;
 				};
 
-				v2f vertexFunction (appdata v) {
+				v2f vertexFunction (appdata IN) {
 					v2f OUT;
 
 					return OUT;
@@ -305,3 +305,129 @@ Shader "Unlit/Tutorial_Shader" {
 ```
 
 ## Part 5: Shading basics
+
+First thing we'll do is get the correct positions of the vertices. We'll do this using a function called UnityObjectToClipPos() like so:
+```
+v2f vertexFunction (appdata IN) {
+	v2f OUT;
+
+	OUT.position = UnityObjectToClipPos(IN.vertex);
+
+	return OUT;
+}
+```
+What this function does is take a vertex that is represented in local object space, and tranforms it into the rendering camera's clip space. Notice we're passing along the transformed point by setting OUT.position's value.
+Next, we'll give an output to our fragment function: 
+```
+fixed4 fragmentFunction (v2f IN) : SV_TARGET {
+	return fixed4(0, 1, 0, 1); //(R, G, B, A)
+}
+```
+And now, the moment you've been waiting for! Save your shader and return to Unity and you'll see our beautiful green objects!
+
+![Shading Basics 1](./Images/Shading_Basics_1.png)
+
+Okay, this probably not that impressive to you, so lets keep building. How about, instead of returning a basic green colour, we edit our shader to return any colour we want? What we'll need to do to achieve this is start working with custom properties.
+
+We can add properties we want to use by following this syntax:
+```
+name ("display name", type) = default value
+```
+So for example, we'll expose a colour value like so:
+```
+Properties {
+	_Colour ("Totally Rad Colour!", Color) = (1, 1, 1, 1)
+}
+```
+Here we're defining a colour for us to use, called *_Colour* and it will be shown as "Totally Rad Colour!" in the Unity inspector. We're also giving it a default value of white.
+If you save and return to Unity now, when inspect the material, you should see this:
+
+![Shading Basics 2](./Images/Shading_Basics_2.png)
+
+Before we can use this colour, we need to actually pass it into the CG code. Unity does this automatically by binding it by variable name like so:
+
+```
+CGPROGRAM
+	#pragma vertex vertexFunction
+	#pragma fragment fragmentFunction
+
+	#include "UnityCG.cginc"
+
+	struct appdata {
+		float4 vertex : POSITION;
+		float2 uv : TEXCOORD0;
+	};
+
+	struct v2f {
+		float4 position : SV_POSITION;
+		float2 uv : TEXCOORD0;
+	};
+
+	//Get our properties into CG
+	float4 _Colour;
+
+	v2f vertexFunction (appdata IN) {
+		v2f OUT;
+		OUT.position = UnityObjectToClipPos(IN.vertex);
+		return OUT;
+	}
+
+	fixed4 fragmentFunction (v2f IN) : SV_TARGET {
+		return fixed4(0, 1, 0, 1);
+	}
+ENDCG
+```
+*I like to put properties after my structs to keep my code organized, but you can put it anywhere so long as its in the top scope of the CGPROGRAM*
+
+We can now use our _Colour value in our fragment function. Instead of returning that green, lets just return whatever colour we want:
+```
+fixed4 fragmentFunction (v2f IN) : SV_TARGET {
+	return _Colour;
+}
+```
+And now, we can save and return to Unity. If you inspect the material and start changing our colour value, you should see all the colours of the objects change accordingly!
+
+![Shading Basics 3](./Images/Shading_Basics_3.png)
+
+Since we now know how to add properties, lets try adding a standard texture map. We'll need a new property for our texture:
+
+```
+Properties {
+	_Colour ("Colour", Color) = (1, 1, 1, 1)
+	_MainTexture ("Main Texture", 2D) = "white" {}
+}
+```
+Notice how it's of type *2D* (2D Texture), and we're defaulting to a blank white texture. We've also need to get the property into CG to use it:
+
+```
+float4 _Colour;
+sampler2D _MainTexture;
+```
+Then, we need to give our fragment function the UV coordinates from the model. We can do this by going back to our vertex function and passing them into the v2f struct we return like so:
+
+```
+v2f vertexFunction (appdata IN) {
+	v2f OUT;
+	OUT.position = UnityObjectToClipPos(IN.vertex);
+	OUT.uv = IN.uv;
+	return OUT;
+}
+```
+Now in order to use the colours from the texture for our fragment function, we need to *sample* it as certain points. Thankfully, CG has a function that does this for us, called *tex2D*.
+
+```
+fixed4 fragmentFunction (v2f IN) : SV_TARGET {
+	return tex2D(_MainTexture, IN.uv);
+}
+```
+tex2D takes in the texture (ie: sample2D) we want to sample, and the UV coordinate we want to sample with. In this case, we're providing it with out main texture and giving it the point on the model where we want to get the colour from, then returning that result as our final colour. Now, if you save and return back to Unity and inspect the material, we can select the bowl texture for our "Main Texture". You'll see the models update, and the bowl model in particular (the model the texture was made for) should look like a bowl of soup!
+
+![Shading Basics 4](./Images/Shading_Basics_4.png)
+
+__Note: We can change how Textures in Unity are sampled by going back to the texture file and changing the filter mode in the inspector:__
+
+![Shading Basics 5](./Images/Shading_Basics_5.png)
+![Shading Basics 6](./Images/Shading_Basics_6.png)
+
+## Part 6: Playing With Shaders
+
