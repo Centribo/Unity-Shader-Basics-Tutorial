@@ -13,8 +13,7 @@
 
 				}
 
-				void fragmentFunction () {
-
+				void fragmentFunction (){
 				}
 			ENDCG
 		}

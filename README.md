@@ -60,7 +60,9 @@ Everything in the scene should look white and without shadows or shading, like t
 
 ## Part 4: Skeleton of a Unlit Shader
 
-Time to start writing our shader! Let's open our Tutorial_Shader.shader file we create before. You'll see Unity automatically generates some code for us to use/build off of. For the sake of this tutorial, delete all of this and make the .shader file blank. All shaders in Unity are written in language called "ShaderLab".
+Time to start writing our shader! Let's open our Tutorial_Shader.shader file we created before. You'll see Unity automatically generates some code for us to use/build off of. For the sake of this tutorial, delete all of this and make the .shader file blank. 
+
+__Note: All shaders in Unity are written in language called "ShaderLab"__
 
 To start we'll add this code:
 
@@ -102,7 +104,6 @@ Underneath our properties block we'll have our subshader:
 ```
 Shader "Unlit/Tutorial_Shader" {
 	Properties {
-		...
 	}
 
 	SubShader {
@@ -117,7 +118,6 @@ Then we have our pass:
 ```
 Shader "Unlit/Tutorial_Shader" {
 	Properties {
-		...
 	}
 
 	SubShader {
@@ -133,7 +133,6 @@ Within our pass, we have the actual rendering code block:
 ```
 Shader "Unlit/Tutorial_Shader" {
 	Properties {
-		...
 	}
 
 	SubShader {
@@ -149,28 +148,127 @@ Anything within CGPROGRAM and ENDCG is where we actually write our shading code.
 
 Next, we'll tell Unity what our vertex and fragment functions are:
 ```
-Shader "Unlit/Tutorial_Shader" {
-	Properties {
-		...
-	}
-
-	SubShader {
-		Pass {
-			CGPROGRAM
-				#pragma vertex vertexFunction
-				#pragma fragment fragmentFunction
-			ENDCG
-		}
-	}
-}
+CGPROGRAM
+	#pragma vertex vertexFunction
+	#pragma fragment fragmentFunction
+ENDCG
 ```
 Here, we're saying we have a vertex function called "vertexFunction", and a fragment function called "fragmentFunction"".
 
 We'll define those functions aswell:
 ```
+CGPROGRAM
+	#pragma vertex vertexFunction
+	#pragma fragment fragmentFunction
+
+	void vertexFunction () {
+
+	}
+
+	void fragmentFunction () {
+
+	}
+ENDCG
+```
+Before we start shading, we need to setup some data structures and our two functions in a way that we can take Unity's given data and give it back to Unity. First, we'll include *UnityCG.inc*. This file includes a number of helper functions that we can use. If you want a full list of them, you can go [here.](https://docs.unity3d.com/Manual/SL-BuiltinFunctions.html)
+
+We'll also add a data structure called *appdata*, and modify our vertex function so that it takes in a appdata structure:
+
+```
+CGPROGRAM
+	#pragma vertex vertexFunction
+	#pragma fragment fragmentFunction
+
+	#import "UnityCG.cginc"
+
+	struct appdata {
+
+	};
+
+	void vertexFunction (appdata v) {
+
+	}
+
+	void fragmentFunction () {
+
+	}
+ENDCG
+```
+When we give Unity an argument to call the vertex function with, it will look into the structure of that argument (in this case, our *appdata* structure) and attempt to pass in values to it based on the model that is being drawn. We can define data that we want Unity to pass in by declaring variables like this:
+
+```
+[type] [name] : [semantic];
+```
+So for example, we can ask Unity for the positions of the vertices of this model like this:
+```
+float4 vertex : POSITION;
+```
+For now we'll ask Unity to give us the position of the vertices and the coordinates of the UV like so:
+```
+struct appdata {
+	float4 vertex : POSITION;
+	float2 uv : TEXCOORD0;
+};
+```
+If you want to learn more about providing vertex data to vertex functions, you can read [here.](https://docs.unity3d.com/Manual/SL-VertexProgramInputs.html)
+
+Lastly for the vertex function setup, we'll create one more struct called *v2f* (which stands for vertex to fragment) that will contain the data we'll be passing into our fragment function. We'll also make sure our vertex function returns data of this struct and create and return a blank one while we're at it:
+```
+CGPROGRAM
+	#pragma vertex vertexFunction
+	#pragma fragment fragmentFunction
+
+	#import "UnityCG.cginc"
+
+	struct appdata {
+		float4 vertex : POSITION;
+		float2 uv : TEXCOORD0;
+	};
+
+	struct v2f {
+	};
+
+	v2f vertexFunction (appdata v) {
+		v2f OUT;
+
+		return OUT;
+	}
+
+	void fragmentFunction () {
+
+	}
+ENDCG
+```
+Just like before we can define some data in v2f that we want to pass from our vertex function to our fragment function.
+```
+struct v2f {
+	float4 position : SV_POSITION;
+	float2 uv : TEXCOORD0;
+};
+```
+*If you're curious about SV_POSITION vs POSITION, SV stands for "system value" and represents in our v2f struct that this will be the final transformed vertex position use for rendering.*
+
+Okay we're almost ready, we just need to edit our fragment function. First, we'll modify it to take in the v2f struct and make it return a fixed4 value:
+```
+fixed4 fragmentFunction (v2f IN) {
+
+}
+```
+Our output for the fragment function will be a colour represented by (R, G, B, A) values;
+
+Lastly, we're going to add an output semantic SV_TARGET to our fragment function like so:
+```
+fixed4 fragmentFunction (v2f IN) : SV_TARGET {
+
+}
+```
+This tells Unity that we're outputting a fixed4 colour to be rendered.
+We're now ready to start actually coding the meat and potatoes of our vertex and fragment functions!
+Here's our basic skeleton that we've made up to this point:
+```
 Shader "Unlit/Tutorial_Shader" {
 	Properties {
-		...
+		
 	}
 
 	SubShader {
@@ -179,11 +277,25 @@ Shader "Unlit/Tutorial_Shader" {
 				#pragma vertex vertexFunction
 				#pragma fragment fragmentFunction
 
-				void vertexFunction () {
+				#import "UnityCG.cginc"
 
+				struct appdata {
+					float4 vertex : POSITION;
+					float2 uv : TEXCOORD0;
+				};
+
+				struct v2f {
+					float4 position : SV_POSITION;
+					float2 uv : TEXCOORD0;
+				};
+
+				v2f vertexFunction (appdata v) {
+					v2f OUT;
+
+					return OUT;
 				}
 
-				void fragmentFunction () {
+				fixed4 fragmentFunction (v2f IN) : SV_TARGET {
 
 				}
 			ENDCG
@@ -191,6 +303,5 @@ Shader "Unlit/Tutorial_Shader" {
 	}
 }
 ```
-If you save your shader now and return to Unity, your objects will disappear! That's because this is bare skeleton for a unlit shader, but we're not returning anything for Unity to actually render.
 
-## Part 5: Basic Shading
+## Part 5: Skeleton of a Unlit Shader
