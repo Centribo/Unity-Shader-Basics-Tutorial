@@ -784,3 +784,11 @@ __Note: If you notice that when you update the vertices but the shadows are not 
 ```
 
 Surface shaders have alot going on within them are are much more complex, but they ultimately compile down to vertex and fragment functions just like the ones we were writing before. I highly suggest reading the official documentation [here](https://docs.unity3d.com/Manual/SL-SurfaceShaders.html) to learn more about them. The official documenation also has a great page of examples [here](https://docs.unity3d.com/Manual/SL-SurfaceShaderLightingExamples.html) which is a good place to start if you want to understand them better. Alan Zucconi also has a great tutorial introducing them available [here.](http://www.alanzucconi.com/2015/06/17/surface-shaders-in-unity3d/)
+
+## Part 9: Other Shaders
+
+So far we've talked about the *unlit* shader and the *surface* shader. Let's talk about the other types of shaders we can use in Unity.
+
+The *Image Effect* shader is exactly as it sounds, it's a shader for image effects. More specifically, they tend to take a texture as their input and output a texture aswell. They can be applied to cameras in Unity or any other texture to affect their look before being outputted to the screen. As an exercise, try creating a new one in Unity and attempting to understand the code! They are great for doing things like the "CRT" effect, or a black and white effect. Dan John Moran has a great video tutorial available [here](https://www.youtube.com/watch?v=kpBnIAPtsj8) which introduces image effect shaders and how to create/use them. (His channel in general is a great place to start learning more about shaders!)
+
+The *Compute* shader is a type of shader that is used for computing and calculating data. Remember how I said shaders run in the GPU? For some computational tasks, this can be extremely beneficial as they will run much faster in a parallel process. For example, they can be used to calculate physics, or the position of particles in a simulation. In general, most people will never need to touch compute shaders. If you'd like to learn more you can check out a tutorial by Kyle Halladay available [here.](http://kylehalladay.com/blog/tutorial/2014/06/27/Compute-Shaders-Are-Nifty.html) (Admittedly I don't know too much about compute shaders myself.)
