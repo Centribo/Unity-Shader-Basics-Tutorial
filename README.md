@@ -14,7 +14,7 @@ Wikipedia has a great article about shaders [here.](https://en.wikipedia.org/wik
 
 ## Part 2: The Rendering Pipeline
 
-For our purposes, we'll simplify the rendering pipeline. Here's a image showing what we'll discuss in this tutorial:
+For our purposes, we'll simplify the rendering pipeline. Here's an image showing what we'll discuss in this tutorial:
 
 ![Simplified Rendering Pipeline](./Images/Rendering_Pipeline.png)
 
@@ -780,7 +780,7 @@ void vert(inout appdata_full v){
 __Note: If you notice that when you update the vertices but the shadows are not also being updated, make sure to add the "addshadow" pragma like this:__
 
 ```
-#pragma surface surf Standard fullforwardshadows addshadow
+#pragma surface surf Standard fullforwardshadows vertex:vert addshadow
 ```
 
 Surface shaders have alot going on within them are are much more complex, but they ultimately compile down to vertex and fragment functions just like the ones we were writing before. I highly suggest reading the official documentation [here](https://docs.unity3d.com/Manual/SL-SurfaceShaders.html) to learn more about them. The official documenation also has a great page of examples [here](https://docs.unity3d.com/Manual/SL-SurfaceShaderLightingExamples.html) which is a good place to start if you want to understand them better. Alan Zucconi also has a great tutorial introducing them available [here.](http://www.alanzucconi.com/2015/06/17/surface-shaders-in-unity3d/)
@@ -795,7 +795,7 @@ The *Compute* shader is a type of shader that is used for computing and calculat
 
 ## Part 10: Further Reading
 
-Hopefully this tutorial has helped you in getting started on writing your own shaders, but there is still alot to learn! Shaders are a vital ingredient in helping shape how your game looks and performs. My suggestions is to keep experimenting and keep learning. (that doesn't just apply to shaders either!) If you see a neat or notable effect in a game, chances are shaders have a part in achieving it, so try your hand at replicating it. This section is dedicated in listing some resources that have been useful to me for learning about shaders.
+Hopefully this tutorial has helped you in getting started on writing your own shaders, but there is still alot to learn! Shaders are a vital ingredient in helping shape how your game looks and performs. My suggestion is to keep experimenting and keep learning. (that doesn't just apply to shaders either!) If you see a neat or notable effect in a game, chances are shaders have a part in achieving it, so try your hand at replicating it. This section is dedicated in listing some resources that have been useful to me for learning about shaders.
 
 * __[Unity Manual, Shader Reference](https://docs.unity3d.com/Manual/SL-Reference.html)__
 	* [ShaderLab Syntax](https://docs.unity3d.com/Manual/SL-Shader.html)
