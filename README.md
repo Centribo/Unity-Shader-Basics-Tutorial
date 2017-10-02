@@ -792,3 +792,18 @@ So far we've talked about the *unlit* shader and the *surface* shader. Let's tal
 The *Image Effect* shader is exactly as it sounds, it's a shader for image effects. More specifically, they tend to take a texture as their input and output a texture aswell. They can be applied to cameras in Unity or any other texture to affect their look before being outputted to the screen. As an exercise, try creating a new one in Unity and attempting to understand the code! They are great for doing things like the "CRT" effect, or a black and white effect. Dan John Moran has a great video tutorial available [here](https://www.youtube.com/watch?v=kpBnIAPtsj8) which introduces image effect shaders and how to create/use them. (His channel in general is a great place to start learning more about shaders!)
 
 The *Compute* shader is a type of shader that is used for computing and calculating data. Remember how I said shaders run in the GPU? For some computational tasks, this can be extremely beneficial as they will run much faster in a parallel process. For example, they can be used to calculate physics, or the position of particles in a simulation. In general, most people will never need to touch compute shaders. If you'd like to learn more you can check out a tutorial by Kyle Halladay available [here.](http://kylehalladay.com/blog/tutorial/2014/06/27/Compute-Shaders-Are-Nifty.html) (Admittedly I don't know too much about compute shaders myself.)
+
+## Part 10: Further Reading
+
+Hopefully this tutorial has helped you in getting started on writing your own shaders, but there is still alot to learn! Shaders are a vital ingredient in helping shape how your game looks and performs. My suggestions is to keep experimenting and keep learning. (that doesn't just apply to shaders either!) If you see a neat or notable effect in a game, chances are shaders have a part in achieving it, so try your hand at replicating it. This section is dedicated in listing some resources that have been useful to me for learning about shaders.
+
+* __[Unity Manual, Shader Reference](https://docs.unity3d.com/Manual/SL-Reference.html)__
+	* [ShaderLab Syntax](https://docs.unity3d.com/Manual/SL-Shader.html)
+	* [Writing Vertex and Fragment Shaders](https://docs.unity3d.com/Manual/SL-ShaderPrograms.html)
+	* [Vertex and Fragment Shader Examples](https://docs.unity3d.com/Manual/SL-VertexFragmentShaderExamples.html)
+	* [Writing Surface Shaders](https://docs.unity3d.com/Manual/SL-SurfaceShaders.html)
+	* [Surface Shader Examples](https://docs.unity3d.com/Manual/SL-SurfaceShaderLightingExamples.html)
+* __[Nvidia Cg Documentation](http://developer.download.nvidia.com/cg/index_stdlib.html)__
+* __[Catlike Coding's/Jasper Flick's Tutorials](http://catlikecoding.com/unity/tutorials/)__
+* __[Alan Zucconi's Tutorials](http://www.alanzucconi.com/tutorials/)__
+* __[Makin' Stuff Look Good in Video Games](https://www.youtube.com/channel/UCEklP9iLcpExB8vp_fWQseg)__
