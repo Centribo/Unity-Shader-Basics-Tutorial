@@ -44,7 +44,7 @@
 					float4 textureColour = tex2D(_MainTexture, IN.uv);
 					float4 dissolveColour = tex2D(_DissolveTexture, IN.uv);
 					clip(dissolveColour.rgb - _DissolveCutoff);
-					return textureColour;
+					return textureColour * _Colour;
 				}
 			ENDCG
 		}

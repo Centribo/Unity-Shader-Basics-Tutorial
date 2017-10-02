@@ -112,7 +112,7 @@ Shader "Unlit/Tutorial_Shader" {
 }
 ```
 
-Each shader has 1 or more subshaders. If you're deploying to multiple platforms it can be useful to add multiple subshaders; For example, you might want a subshader that is higher quality for PC/Desktop and lower quality but faster subshader for mobile.
+Every shader has one or more subshaders. If you're deploying to multiple platforms it can be useful to add multiple subshaders; For example, you might want a subshader that is higher quality for PC/Desktop and lower quality but faster subshader for mobile.
 
 Then we have our pass:
 ```
@@ -127,7 +127,7 @@ Shader "Unlit/Tutorial_Shader" {
 	}
 }
 ```
-Each subshader has atleast one pass, which is actually where the object get rendered. Some effects require having multiple passes, but we'll just focus on one for now.
+Each subshader has atleast one pass, which is actually where the object gets rendered. Some effects require having multiple passes, but we'll just focus on one for now.
 
 Within our pass, we have the actual rendering code block:
 ```
@@ -170,9 +170,9 @@ CGPROGRAM
 	}
 ENDCG
 ```
-Before we start shading, we need to setup some data structures and our two functions in a way that we can take Unity's given data and give it back to Unity. First, we'll include *UnityCG.inc*. This file includes a number of helper functions that we can use. If you want a full list of them, you can go [here.](https://docs.unity3d.com/Manual/SL-BuiltinFunctions.html)
+Before we start shading, we need to setup some data structures and our two functions in a way that we can take Unity's given data and data back to Unity. First, we'll include *UnityCG.inc*. This file includes a number of helper functions that we can use. If you want a full list of them, you can go [here.](https://docs.unity3d.com/Manual/SL-BuiltinFunctions.html)
 
-We'll also add a data structure called *appdata*, and modify our vertex function so that it takes in a appdata structure:
+We'll also add a data structure called *appdata*, and modify our vertex function so that it takes in an appdata structure:
 
 ```
 CGPROGRAM
@@ -340,7 +340,7 @@ Properties {
 }
 ```
 Here we're defining a colour for us to use, called *_Colour* and it will be shown as "Totally Rad Colour!" in the Unity inspector. We're also giving it a default value of white.
-If you save and return to Unity now, when inspect the material, you should see this:
+If you save and return to Unity now, when you inspect the material, you should see this:
 
 ![Shading Basics 2](./Images/Shading_Basics_2.png)
 
@@ -413,14 +413,14 @@ v2f vertexFunction (appdata IN) {
 	return OUT;
 }
 ```
-Now in order to use the colours from the texture for our fragment function, we need to *sample* it as certain points. Thankfully, CG has a function that does this for us, called *tex2D*.
+Now in order to use the colours from the texture for our fragment function, we need to *sample* it at certain points. Thankfully, CG has a function that does this for us, called *tex2D*.
 
 ```
 fixed4 fragmentFunction (v2f IN) : SV_TARGET {
 	return tex2D(_MainTexture, IN.uv);
 }
 ```
-tex2D takes in the texture (ie: sample2D) we want to sample, and the UV coordinate we want to sample with. In this case, we're providing it with out main texture and giving it the point on the model where we want to get the colour from, then returning that result as our final colour. Now, if you save and return back to Unity and inspect the material, we can select the bowl texture for our "Main Texture". You'll see the models update, and the bowl model in particular (the model the texture was made for) should look like a bowl of soup!
+tex2D takes in the texture (ie: sample2D) we want to sample, and the UV coordinate we want to sample with. In this case, we're providing it with our main texture and giving it the point on the model where we want to get the colour from, then returning that result as our final colour. Now, if you save and return back to Unity and inspect the material, we can select the bowl texture for our "Main Texture". You'll see the models update, and the bowl model in particular (the model the texture was made for) should look like a bowl of soup!
 
 ![Shading Basics 4](./Images/Shading_Basics_4.png)
 
@@ -533,3 +533,123 @@ Make sure "Animated Materials" is checked on in the scene view in order to previ
 
 ![Playing With Shaders 3](./Images/Playing_With_Shaders_3.gif)
 
+Here's our final shader:
+
+```
+Shader "Unlit/Tutorial_Shader" {
+	Properties {
+		_Colour ("Colour", Color) = (1, 1, 1, 1)
+		_MainTexture ("Main Texture", 2D) = "white" {}
+		_DissolveTexture ("Dissolve Texture", 2D) = "white" {}
+		_DissolveCutoff ("Dissolve Cutoff", Range(0, 1)) = 1
+		_ExtrudeAmount ("Extrue Amount", float) = 0
+	}
+
+	SubShader {
+		Pass {
+			CGPROGRAM
+				#pragma vertex vertexFunction
+				#pragma fragment fragmentFunction
+
+				#include "UnityCG.cginc"
+
+				struct appdata {
+					float4 vertex : POSITION;
+					float2 uv : TEXCOORD0;
+					float3 normal : NORMAL;
+				};
+
+				struct v2f {
+					float4 position : SV_POSITION;
+					float2 uv : TEXCOORD0;
+				};
+
+				float4 _Colour;
+				sampler2D _MainTexture;
+				sampler2D _DissolveTexture;
+				float _DissolveCutoff;
+				float _ExtrudeAmount;
+
+				v2f vertexFunction (appdata IN) {
+					v2f OUT;
+					IN.vertex.xyz += IN.normal.xyz * _ExtrudeAmount * sin(_Time.y);
+					OUT.position = UnityObjectToClipPos(IN.vertex);
+					OUT.uv = IN.uv;
+					return OUT;
+				}
+
+				fixed4 fragmentFunction (v2f IN) : SV_TARGET {
+					float4 textureColour = tex2D(_MainTexture, IN.uv);
+					float4 dissolveColour = tex2D(_DissolveTexture, IN.uv);
+					clip(dissolveColour.rgb - _DissolveCutoff);
+					return textureColour;
+				}
+			ENDCG
+		}
+	}
+}
+```
+
+## Part 7: Scripting and Shaders
+
+Next, we'll talk about how control shaders with Unity scripts. For this example, we'll reuse the _Colour property we added before. First, lets set it as a colour tint for our shader by doing this in our fragment function:
+
+```
+fixed4 fragmentFunction (v2f IN) : SV_TARGET {
+	float4 textureColour = tex2D(_MainTexture, IN.uv);
+	float4 dissolveColour = tex2D(_DissolveTexture, IN.uv);
+	clip(dissolveColour.rgb - _DissolveCutoff);
+	return textureColour * _Colour;
+}
+```
+We're just multiplying the output colour by our _Colour property to tint it. Here's what that looks like in the editor:
+
+![Scripting and Shaders 1](./Images/Scripting_and_Shaders_1.png)
+
+Alright, lets start scripting. We'll add a new script to all the objects and we'll call it *RainbowColour.cs*
+
+![Scripting and Shaders 2](./Images/Scripting_and_Shaders_2.png)
+
+In our script, we'll start by declaring two private variables for our Renderer and our Material:
+
+```csharp
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class RainbowColour : MonoBehaviour {
+
+	Renderer rend;
+	Material material;
+
+	void Start () {
+		
+	}
+	
+	void Update () {
+		
+	}
+}
+```
+
+We'll also get references to them in our Start() function:
+```csharp
+void Start () {
+	rend = GetComponent<Renderer>();
+	material = rend.material;
+}
+```
+We will use Material.SetColor(...) to set the colour in our shader. This function's first argument is a string, which is the name of the property we want to set. The second argument is the colour we want to set the property to.
+```csharp
+void Start () {
+	rend = GetComponent<Renderer>();
+	material = rend.material;
+	material.SetColor("_Colour", Color.magenta);
+}
+```
+
+Now notice when we start our game, the tint colour changes to magenta!
+
+![Scripting and Shaders 3](./Images/Scripting_and_Shaders_3.gif)
+
+There are many functions for getting and setting properties for materials from within scripts, and you can find all of them [here.](https://docs.unity3d.com/ScriptReference/Material.html)
