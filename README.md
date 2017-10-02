@@ -653,3 +653,134 @@ Now notice when we start our game, the tint colour changes to magenta!
 ![Scripting and Shaders 3](./Images/Scripting_and_Shaders_3.gif)
 
 There are many functions for getting and setting properties for materials from within scripts, and you can find all of them [here.](https://docs.unity3d.com/ScriptReference/Material.html)
+
+## Part 8: Shadows? Surface Shaders?
+
+Up to this point, we've been writing *unlit* shaders. Unity also lets you write *surface* shaders. Surface shaders are actually just like vertex/fragment shaders except they strip away alot of the boilerplate code that is required to make shaders interact with lighting and shadows. If you're curious about going through that process of writing code for lighting and shadows, there is a great tutorial by Jasper Flick [here.](http://catlikecoding.com/unity/tutorials/rendering/part-4/)
+
+What I'll show you in this section is how each part of the surface shader relates to our vertex/fragment shaders. If you create a new "Standard Surface Shader" from within Unity, you'll get this auto-generated code:
+
+```
+Shader "Custom/NewSurfaceShader" {
+	Properties {
+		_Color ("Color", Color) = (1,1,1,1)
+		_MainTex ("Albedo (RGB)", 2D) = "white" {}
+		_Glossiness ("Smoothness", Range(0,1)) = 0.5
+		_Metallic ("Metallic", Range(0,1)) = 0.0
+	}
+	SubShader {
+		Tags { "RenderType"="Opaque" }
+		LOD 200
+		
+		CGPROGRAM
+		// Physically based Standard lighting model, and enable shadows on all light types
+		#pragma surface surf Standard fullforwardshadows
+
+		// Use shader model 3.0 target, to get nicer looking lighting
+		#pragma target 3.0
+
+		sampler2D _MainTex;
+
+		struct Input {
+			float2 uv_MainTex;
+		};
+
+		half _Glossiness;
+		half _Metallic;
+		fixed4 _Color;
+
+		// Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
+		// See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
+		// #pragma instancing_options assumeuniformscaling
+		UNITY_INSTANCING_CBUFFER_START(Props)
+			// put more per-instance properties here
+		UNITY_INSTANCING_CBUFFER_END
+
+		void surf (Input IN, inout SurfaceOutputStandard o) {
+			// Albedo comes from a texture tinted by color
+			fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
+			o.Albedo = c.rgb;
+			// Metallic and smoothness come from slider variables
+			o.Metallic = _Metallic;
+			o.Smoothness = _Glossiness;
+			o.Alpha = c.a;
+		}
+		ENDCG
+	}
+	FallBack "Diffuse"
+}
+```
+
+Let's go through each section that is new and explain what they do. First, the tags:
+```
+SubShader {
+		Tags { "RenderType"="Opaque" }
+		...
+}
+```
+Tags help you tell the rendering engine how and when the shader you're writing is going to be rendered. You can learn more about tags [here.](https://docs.unity3d.com/Manual/SL-SubShaderTags.html) In this case, we're just specifying that our shader is opaque; Especially useful for producing a depth texture/map.
+
+```
+LOD 200
+```
+The shader Level of Detail or (LOD) helps specify which shader to use on certain hardware. The higher the LOD, the more "complex" the shader is. This value has nothing to do with model LOD. You can read more about shader LOD [here.](https://docs.unity3d.com/Manual/SL-ShaderLOD.html)
+```
+#pragma surface surf Standard fullforwardshadows
+```
+Similar to how we defined the vertex and fragment functions, we care defining here a surface function called surf. "Standard" tells Unity that this shader uses the standard lighting model, and "fullforwardshadows" specifies that this shader should enable all regular shadow types.
+```
+#pragma target 3.0
+```
+This tells which lighting version to compile. The higher the value, the more complex and better looking but the more system requirements. You can read more about this [here.](https://docs.unity3d.com/Manual/SL-ShaderCompileTargets.html)
+```
+void surf (Input IN, inout SurfaceOutputStandard o) {
+	// Albedo comes from a texture tinted by color
+	fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
+	o.Albedo = c.rgb;
+	// Metallic and smoothness come from slider variables
+	o.Metallic = _Metallic;
+	o.Smoothness = _Glossiness;
+	o.Alpha = c.a;
+}
+```
+This is the heart of the shader. Instead of specifying exactly the colour value of the pixel, Unity defines a SurfaceOutputStandard structure. It has attributes such as Albedo (for colour) which you will set. Since we're working with lighting and shadows now, we don't just grab the colour directly, it needs to be calculated from values held in SurfaceOutputStandard. Here are all the attributes that are part of SurfaceOutputStandard:
+```
+struct SurfaceOutput
+{
+	fixed3 Albedo;  // diffuse color
+	fixed3 Normal;  // tangent space normal, if written
+	fixed3 Emission;
+	half Specular;  // specular power in 0..1 range
+	fixed Gloss;    // specular intensity
+	fixed Alpha;    // alpha for transparencies
+};
+```
+
+__Okay, so what about vertices?__
+
+By default, the standard surface shader doesn't expose a function for editing vertices. We can still add one though. First, we'll add to the pragma and define a vertex function:
+```
+#pragma surface surf Standard fullforwardshadows vertex:vert
+```
+And also define the function:
+```
+void vert(inout appdata_full v){
+	
+}
+```
+The "appdata_full" structure will automatically be filled in by Unity with the attributes of the model we're rendering. This is the same as before, except instead of explicitly creating our own structure, Unity has already defined a few for us. You can see what other structures they have defined and what attributes will be passed in [here.](https://docs.unity3d.com/Manual/SL-VertexProgramInputs.html)
+
+Now we can edit the vertices as normal. For example, to translate the code we had before:
+```
+void vert(inout appdata_full v){
+	v.vertex.xyz += v.normal.xyz * _ExtrudeAmount * sin(_Time.y);
+}
+```
+
+__Note: If you notice that when you update the vertices but the shadows are not also being updated, make sure to add the "addshadow" pragma like this:__
+
+```
+#pragma surface surf Standard fullforwardshadows addshadow
+```
+
+Surface shaders have alot going on within them are are much more complex, but they ultimately compile down to vertex and fragment functions just like the ones we were writing before. I highly suggest reading the official documentation [here](https://docs.unity3d.com/Manual/SL-SurfaceShaders.html) to learn more about them. The official documenation also has a great page of examples [here](https://docs.unity3d.com/Manual/SL-SurfaceShaderLightingExamples.html) which is a good place to start if you want to understand them better. Alan Zucconi also has a great tutorial introducing them available [here.](http://www.alanzucconi.com/2015/06/17/surface-shaders-in-unity3d/)
