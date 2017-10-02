@@ -799,6 +799,7 @@ Hopefully this tutorial has helped you in getting started on writing your own sh
 
 * __[Unity Manual, Shader Reference](https://docs.unity3d.com/Manual/SL-Reference.html)__
 	* [ShaderLab Syntax](https://docs.unity3d.com/Manual/SL-Shader.html)
+	* [Built-in Shader Helper Functions](https://docs.unity3d.com/Manual/SL-BuiltinFunctions.html)
 	* [Writing Vertex and Fragment Shaders](https://docs.unity3d.com/Manual/SL-ShaderPrograms.html)
 	* [Vertex and Fragment Shader Examples](https://docs.unity3d.com/Manual/SL-VertexFragmentShaderExamples.html)
 	* [Writing Surface Shaders](https://docs.unity3d.com/Manual/SL-SurfaceShaders.html)
