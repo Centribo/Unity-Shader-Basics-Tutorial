@@ -62,7 +62,7 @@ Everything in the scene should look white and without shadows or shading, like t
 
 Time to start writing our shader! Let's open our Tutorial_Shader.shader file we created before. You'll see Unity automatically generates some code for us to use/build off of. For the sake of this tutorial, delete all of this and make the .shader file blank. 
 
-__Note: All shaders in Unity are written in language called "ShaderLab"__
+__Note: All shaders in Unity are written in language called "ShaderLab." Shaderlab is a wrapper for HLSL/Cg that lets Unity cross compile shader code and expose properties to the inspector.__
 
 To start we'll add this code:
 
