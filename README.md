@@ -589,6 +589,7 @@ Shader "Unlit/Tutorial_Shader" {
 	}
 }
 ```
+*(If you want to see a commented version, go [here.](./Assets/Shaders/Tutorial_Shader.shader))*
 
 ## Part 7: Scripting and Shaders
 
@@ -651,6 +652,8 @@ void Start () {
 Now notice when we start our game, the tint colour changes to magenta!
 
 ![Scripting and Shaders 3](./Images/Scripting_and_Shaders_3.gif)
+
+*(If you want to see a commented version of the script, go [here.](./Assets/Scripts/RainbowColour.cs))*
 
 There are many functions for getting and setting properties for materials from within scripts, and you can find all of them [here.](https://docs.unity3d.com/ScriptReference/Material.html)
 
