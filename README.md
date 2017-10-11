@@ -453,11 +453,12 @@ Now we can sample the dissolve texture in our fragment function:
 ```
 fixed4 fragmentFunction (v2f IN) : SV_TARGET {
 	float4 textureColour = tex2D(_MainTexture, IN.uv);
-	float4 dissolveColour = tex2D(_Dissolve)
+	float4 dissolveColour = tex2D(_Dissolve, IN.uv);
 	return textureColour;
 }
 ```
-Notice we're still using the same UV coordinates as our main texture. Now here's where the magic happens:
+Notice we're still using the same UV coordinates as our main texture.
+Now here's where the magic happens:
 ```
 fixed4 fragmentFunction (v2f IN) : SV_TARGET {
 	float4 textureColour = tex2D(_MainTexture, IN.uv);
