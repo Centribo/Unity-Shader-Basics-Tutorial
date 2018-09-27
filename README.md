@@ -596,7 +596,7 @@ Shader "Unlit/Tutorial_Shader" {
 
 ## Part 7: Scripting and Shaders
 
-Next, we'll talk about how control shaders with Unity scripts. For this example, we'll reuse the _Colour property we added before. First, lets set it as a colour tint for our shader by doing this in our fragment function:
+Next, we'll talk about how to control shaders with Unity scripts. For this example, we'll reuse the _Colour property we added before. First, lets set it as a colour tint for our shader by doing this in our fragment function:
 
 ```
 fixed4 fragmentFunction (v2f IN) : SV_TARGET {
@@ -789,7 +789,7 @@ __Note: If you notice that when you update the vertices but the shadows are not 
 #pragma surface surf Standard fullforwardshadows vertex:vert addshadow
 ```
 
-Surface shaders have alot going on within them are are much more complex, but they ultimately compile down to vertex and fragment functions just like the ones we were writing before. I highly suggest reading the official documentation [here](https://docs.unity3d.com/Manual/SL-SurfaceShaders.html) to learn more about them. The official documenation also has a great page of examples [here](https://docs.unity3d.com/Manual/SL-SurfaceShaderLightingExamples.html) which is a good place to start if you want to understand them better. Alan Zucconi also has a great tutorial introducing them available [here.](http://www.alanzucconi.com/2015/06/17/surface-shaders-in-unity3d/)
+Surface shaders have alot going on within them and are much more complex, but they ultimately compile down to vertex and fragment functions just like the ones we were writing before. I highly suggest reading the official documentation [here](https://docs.unity3d.com/Manual/SL-SurfaceShaders.html) to learn more about them. The official documenation also has a great page of examples [here](https://docs.unity3d.com/Manual/SL-SurfaceShaderLightingExamples.html) which is a good place to start if you want to understand them better. Alan Zucconi also has a great tutorial introducing them available [here.](http://www.alanzucconi.com/2015/06/17/surface-shaders-in-unity3d/)
 
 ## Part 9: Other Shaders
 
