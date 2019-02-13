@@ -22,7 +22,7 @@ For our purposes, we'll simplify the rendering pipeline. Here's an image showing
 
 I like to think of shaders as programs that transform one type of information (model data, colours, etc.) to another type of information (pixels/fragments). Object data is data that is inherit to the object. Things such as points in the model, normals, triangles, UV coordinates, etc. Custom Data/Properties are things that we can pass into a shader to use. Things such as colours, textures, numbers, etc.
 
-The first step of the shader pipeline is the vertex function. Vertices, as you might know, are just points. The vertex function will work with the vertices in the model (Along with other data such as normals) and prepare them for the next step, the fragment function.
+The first step of the shader pipeline is the vertex function. Vertices, as you might know, are just points in 3D space. The vertex function will work with the vertices in the model (Along with other data such as normals) and prepare them for the next step, the fragment function.
 
 The fragment function will take in vertices and shade them in. Think of it like a painter and their paint brush. It ultimately outputs pixel data, in a (R, G, B, A) format.
 
