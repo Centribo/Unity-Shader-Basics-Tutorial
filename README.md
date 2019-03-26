@@ -1,4 +1,4 @@
-![Logo](./Images/Logo.png)
+****![Logo](./Images/Logo.png)
 # Unity-Shader-Basics-Tutorial
 ### By Adam Leung (www.centribo.com)
 
@@ -50,7 +50,7 @@ Next, right click in the Project view (Or go to Create) and add a new Unlit Shad
 
 Then, right click the shader file we just made and go to Create > Material. Unity will automatically create a material that uses that shader with the correct name.
 
-__Note: a "Material" in Unity is just a *instance* of a shader. It just saves the values of the custom data/properties.__
+__Note: a "Material" in Unity is just a *instance* of a shader. It just saves the values & refences of the custom data/properties.__
 
 ![Setup 3](./Images/Setup_3.png)
 
@@ -64,7 +64,7 @@ Everything in the scene should look white and without shadows or shading, like t
 
 Time to start writing our shader! Let's open our Tutorial_Shader.shader file we created before. You'll see Unity automatically generates some code for us to use/build off of. For the sake of this tutorial, delete all of this and make the .shader file blank. 
 
-__Note: All shaders in Unity are written in language called "ShaderLab." Shaderlab is a wrapper for HLSL/Cg that lets Unity cross compile shader code and expose properties to the inspector.__
+__Note: All shaders in Unity are written in language called "ShaderLab." Shaderlab is a wrapper for HLSL/Cg that lets Unity cross compile shader code for many platforms and expose properties to the inspector.__
 
 To start we'll add this code:
 
@@ -114,7 +114,7 @@ Shader "Unlit/Tutorial_Shader" {
 }
 ```
 
-Every shader has one or more subshaders. If you're deploying to multiple platforms it can be useful to add multiple subshaders; For example, you might want a subshader that is higher quality for PC/Desktop and lower quality but faster subshader for mobile.
+Every shader has one or more subshaders. If you're deploying to multiple platforms it can be useful to add multiple subshaders; For example, you might want two subshaders, one of higher quality for PC/Desktop and one of lower quality but faster for mobile.
 
 Then we have our pass:
 ```
@@ -172,7 +172,7 @@ CGPROGRAM
 	}
 ENDCG
 ```
-Before we start shading, we need to setup some data structures and our two functions in a way that we can take Unity's given data and data back to Unity. First, we'll include *UnityCG.inc*. This file includes a number of helper functions that we can use. If you want a full list of them, you can go [here.](https://docs.unity3d.com/Manual/SL-BuiltinFunctions.html)
+Before we start shading, we need to setup some data structures and our two functions in a way so that we can take in Unity's given data and give data back to Unity. First, we'll include *UnityCG.inc*. This file includes a number of helper functions that we can use. If you want a full list of them, you can go [here.](https://docs.unity3d.com/Manual/SL-BuiltinFunctions.html)
 
 We'll also add a data structure called *appdata*, and modify our vertex function so that it takes in an appdata structure:
 
@@ -250,13 +250,13 @@ struct v2f {
 ```
 *If you're curious about SV_POSITION vs POSITION, SV stands for "system value" and represents in our v2f struct that this will be the final transformed vertex position use for rendering.*
 
-Okay we're almost ready, we just need to edit our fragment function. First, we'll modify it to take in the v2f struct and make it return a fixed4 value:
+Okay we're almost ready, we just need to edit our fragment function. First, we'll modify it to take in the v2f struct and make it return a *fixed4* value:
 ```
 fixed4 fragmentFunction (v2f IN) {
 
 }
 ```
-Our output for the fragment function will be a colour represented by (R, G, B, A) values;
+Our output for the fragment function will be a colour represented by (R, G, B, A) values, hence the output of this function being a *fixed4*.
 
 Lastly, we're going to add an output semantic SV_TARGET to our fragment function like so:
 ```
@@ -318,8 +318,9 @@ v2f vertexFunction (appdata IN) {
 	return OUT;
 }
 ```
-What this function does is take a vertex that is represented in local object space, and tranforms it into the rendering camera's clip space. Notice we're passing along the transformed point by setting OUT.position's value.
-Next, we'll give an output to our fragment function: 
+What this function does is take a vertex that is represented in local object space, and tranforms it into the rendering camera's clip space. Notice we're passing along the transformed point by setting OUT.position's value. If you want to learn more about this, [here](https://learnopengl.com/Getting-started/Coordinate-Systems) is a great discussion on what these spaces are and their purposes.
+
+Next, we'll make our fragment function return a solid green colour: 
 ```
 fixed4 fragmentFunction (v2f IN) : SV_TARGET {
 	return fixed4(0, 1, 0, 1); //(R, G, B, A)
@@ -331,7 +332,7 @@ And now, the moment you've been waiting for! Save your shader and return to Unit
 
 Okay, this probably not that impressive to you, so lets keep building. How about, instead of returning a basic green colour, we edit our shader to return any colour we want? What we'll need to do to achieve this is start working with custom properties.
 
-We can add properties we want to use by following this syntax:
+We can add the properties in the *Properties* block we want to use by following this syntax:
 ```
 name ("display name", type) = default value
 ```
@@ -365,7 +366,9 @@ CGPROGRAM
 		float2 uv : TEXCOORD0;
 	};
 
+	// ****************************
 	//Get our properties into CG
+	// ****************************
 	float4 _Colour;
 
 	v2f vertexFunction (appdata IN) {
@@ -433,7 +436,7 @@ __Note: We can change how Textures in Unity are sampled by going back to the tex
 
 ## Part 6: Playing With Shaders
 
-So now that we know the basics, we can start having some fun with shaders and achieve some simple effects. First, we're going to use our noise texture and achieve a sort of "dissolve" or "cutout" effect. We'll start by adding another texture property and a float property:
+So now that we know the basics, we can start having some fun with shaders and achieve some simple effects. First, we're going to use our noise texture and achieve a sort of "dissolve" or "cutout" effect. We'll start by adding a texture property and a float property:
 ```
 Properties {
 	_Colour ("Colour", Color) = (1, 1, 1, 1)
@@ -442,7 +445,7 @@ Properties {
 	_DissolveCutoff ("Dissolve Cutoff", Range(0, 1)) = 1
 }
 ```
-Notice how we've set _DissolveCutoff to be a Range from (0, 1). This represents a float value from 0 to 1 (inclusive) and this notation also allows us to easily set it's value using a slider. Now let's add them to our CGPROGRAM:
+Notice how we've set _DissolveCutoff to be a Range from (0, 1). This represents a float value from 0 to 1 (inclusive) and this notation also allows us to easily set it's value using a slider from within Unity's inspector. Now let's add them to our CGPROGRAM:
 ```
 float4 _Colour;
 sampler2D _MainTexture;
@@ -525,7 +528,7 @@ We can even animate these properties:
 ```
 v2f vertexFunction (appdata IN) {
 	v2f OUT;
-	IN.vertex.xyz += IN.normal.xyz * _ExtrudeAmount * sin(_Time.y);
+	IN.vertex.xyz += IN.normal.xyz * _ExtrudeAmount * sin(_Time.y); // Note the use of sin(_Time.y)
 	OUT.position = UnityObjectToClipPos(IN.vertex);
 	OUT.uv = IN.uv;
 	return OUT;
@@ -662,7 +665,7 @@ There are many functions for getting and setting properties for materials from w
 
 ## Part 8: Shadows? Surface Shaders?
 
-Up to this point, we've been writing *unlit* shaders. Unity also lets you write *surface* shaders. Surface shaders are actually just like vertex/fragment shaders except they strip away alot of the boilerplate code that is required to make shaders interact with lighting and shadows. If you're curious about going through that process of writing code for lighting and shadows, there is a great tutorial by Jasper Flick [here.](http://catlikecoding.com/unity/tutorials/rendering/part-4/)
+Up to this point, we've been writing *unlit* shaders. Unlit shaders don't consider lights or shadows. Unity also lets you write *surface* shaders. Surface shaders are actually just like vertex/fragment shaders except they strip away alot of the boilerplate code that is required to make shaders interact with lighting and shadows. If you're curious about going through that process of writing code for lighting and shadows, there is a great tutorial by Jasper Flick [here.](http://catlikecoding.com/unity/tutorials/rendering/part-4/)
 
 What I'll show you in this section is how each part of the surface shader relates to our vertex/fragment shaders. If you create a new "Standard Surface Shader" from within Unity, you'll get this auto-generated code:
 
@@ -737,7 +740,7 @@ Similar to how we defined the vertex and fragment functions, we care defining he
 ```
 #pragma target 3.0
 ```
-This tells which lighting version to compile. The higher the value, the more complex and better looking but the more system requirements. You can read more about this [here.](https://docs.unity3d.com/Manual/SL-ShaderCompileTargets.html)
+This tells which lighting version to compile. The higher the value, the more complex and better looking but the higher system requirements. You can read more about this [here.](https://docs.unity3d.com/Manual/SL-ShaderCompileTargets.html)
 ```
 void surf (Input IN, inout SurfaceOutputStandard o) {
 	// Albedo comes from a texture tinted by color
@@ -795,13 +798,13 @@ Surface shaders have alot going on within them and are much more complex, but th
 
 So far we've talked about the *unlit* shader and the *surface* shader. Let's talk about the other types of shaders we can use in Unity.
 
-The *Image Effect* shader is exactly as it sounds, it's a shader for image effects. More specifically, they tend to take a texture as their input and output a texture aswell. They can be applied to cameras in Unity or any other texture to affect their look before being outputted to the screen. As an exercise, try creating a new one in Unity and attempting to understand the code! They are great for doing things like the "CRT" effect, or a black and white effect. Dan John Moran has a great video tutorial available [here](https://www.youtube.com/watch?v=kpBnIAPtsj8) which introduces image effect shaders and how to create/use them. (His channel in general is a great place to start learning more about shaders!)
+The *Image Effect* shader is exactly as it sounds, it's a shader for image effects. More specifically, they tend to take a texture as their input and output a texture aswell. They can be applied to cameras in Unity or any other texture to affect their look before being outputted to the screen/framebuffer. As an exercise, try creating a new one in Unity and attempting to understand the code! They are great for doing things like the "CRT" effect, or a black and white effect. Dan John Moran has a great video tutorial available [here](https://www.youtube.com/watch?v=kpBnIAPtsj8) which introduces image effect shaders and how to create/use them. (His channel in general is a great place to start learning more about shaders!)
 
 The *Compute* shader is a type of shader that is used for computing and calculating data. Remember how I said shaders run in the GPU? For some computational tasks, this can be extremely beneficial as they will run much faster in a parallel process. For example, they can be used to calculate physics, or the position of particles in a simulation. In general, most people will never need to touch compute shaders. If you'd like to learn more you can check out a tutorial by Kyle Halladay available [here.](http://kylehalladay.com/blog/tutorial/2014/06/27/Compute-Shaders-Are-Nifty.html) (Admittedly I don't know too much about compute shaders myself.)
 
 ## Part 10: Further Reading
 
-Hopefully this tutorial has helped you in getting started on writing your own shaders, but there is still alot to learn! Shaders are a vital ingredient in helping shape how your game looks and performs. My suggestion is to keep experimenting and keep learning. (that doesn't just apply to shaders either!) If you see a neat or notable effect in a game, chances are shaders have a part in achieving it, so try your hand at replicating it. This section is dedicated in listing some resources that have been useful to me for learning about shaders.
+Hopefully this tutorial has helped you in getting started on writing your own shaders, but there is still alot to learn! Shaders are a vital ingredient in helping shape how your game looks and performs. My suggestion is to keep experimenting and keep learning. (That doesn't just apply to shaders either!) If you see a neat or notable effect in a game, chances are shaders have a part in achieving it, so try your hand at replicating it. This section is dedicated in listing some resources that have been useful to me for learning about shaders.
 
 * __[Unity Manual, Shader Reference](https://docs.unity3d.com/Manual/SL-Reference.html)__
 	* [ShaderLab Syntax](https://docs.unity3d.com/Manual/SL-Shader.html)
