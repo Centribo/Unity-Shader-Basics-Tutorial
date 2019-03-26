@@ -1,4 +1,4 @@
-****![Logo](./Images/Logo.png)
+![Logo](./Images/Logo.png)
 # Unity-Shader-Basics-Tutorial
 ### By Adam Leung (www.centribo.com)
 
