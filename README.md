@@ -1,10 +1,12 @@
 ![Logo](./Images/Logo.png)
 # Unity-Shader-Basics-Tutorial
-### By Adam Leung (www.centribo.com)
+### By Adam Leung (www.adamleung.me)
 
 Welcome, this tutorial is supposed to be a gentle introduction into writing shaders for Unity. It assumes you have some previous knowledge in working with Unity but have never touched shaders or materials.
 
 We'll be building up the shader in parts, stopping along the way to show what everything does.
+
+> If you have any improvements, suggestions, or spot any mistakes, please contact me!
 
 ## Part 1: What's a Shader?
 
