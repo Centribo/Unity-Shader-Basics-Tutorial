@@ -2,6 +2,8 @@
 # Unity-Shader-Basics-Tutorial
 ### By Adam Leung (www.adamleung.me)
 
+> Check out my favourite code snippets for Unity [here](https://github.com/Centribo/Useful-Unity-Assets) and my favourite Unity packages [here](https://github.com/Centribo/Centribo-Awesome-Unity)!
+
 Welcome, this tutorial is supposed to be a gentle introduction into writing shaders for Unity. It assumes you have some previous knowledge in working with Unity but have never touched shaders or materials.
 
 We'll be building up the shader in parts, stopping along the way to show what everything does.
